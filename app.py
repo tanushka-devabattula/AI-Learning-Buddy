@@ -323,3 +323,45 @@ with notes_tab:
             notes_feature,
             st.session_state.notes_response
         )
+# =====================================================
+# PDF Tools
+# =====================================================
+
+with pdf_tab:
+
+    st.subheader("📄 PDF Learning Tools")
+
+    uploaded_pdf = st.file_uploader(
+        "Upload a PDF",
+        type=["pdf"]
+    )
+
+    if uploaded_pdf:
+
+        try:
+
+            pdf_text = extract_text_from_pdf(uploaded_pdf)
+            pdf_text = clean_pdf_text(pdf_text)
+
+            st.session_state.pdf_text = pdf_text
+
+            stats = get_pdf_statistics(uploaded_pdf)
+
+            col1, col2, col3 = st.columns(3)
+
+            col1.metric("📄 Pages", stats["pages"])
+            col2.metric("📝 Words", stats["words"])
+            col3.metric("🔤 Characters", stats["characters"])
+
+        except Exception as e:
+            show_error(str(e))
+
+    else:
+        st.info("Upload a PDF to begin.")
+
+    
+    if st.session_state.pdf_text:
+
+        st.markdown("---")
+
+        
