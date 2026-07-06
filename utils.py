@@ -86,18 +86,24 @@ def copy_button():
 
 def display_output(title, content):
     """
-    Displays AI output in a nice container.
+    Displays AI output in a clean, professional container.
     """
 
-    st.subheader(title)
+    with st.container():
 
-    st.markdown("---")
+        st.subheader(title)
 
-    st.write(content)
+        st.markdown(content)
 
-    download_text(content)
+        st.download_button(
+            label="📥 Download Result",
+            data=content,
+            file_name="result.txt",
+            mime="text/plain",
+            use_container_width=True,
+        )
 
-    copy_button()
+        st.info("💡 Tip: Select the response and press Ctrl+C to copy.")
 
 
 def show_success(message):
