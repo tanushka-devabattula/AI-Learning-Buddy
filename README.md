@@ -1,4 +1,4 @@
-# 🤖 AI Learning Buddy
+# 🤖 LearnSphere AI
 
 An AI-powered learning assistant built with **Streamlit** and the **OpenRouter API** to help students learn concepts, prepare for interviews, summarize notes, generate quizzes, and analyze PDF documents—all in one place.
 
@@ -58,7 +58,7 @@ An AI-powered learning assistant built with **Streamlit** and the **OpenRouter A
 # 📂 Project Structure
 
 ```text
-AI-Learning-Buddy/
+LearnSphere AI/
 │── app.py
 │── prompts.py
 │── utils.py
@@ -75,13 +75,13 @@ AI-Learning-Buddy/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/AI-Learning-Buddy.git
+git clone https://github.com/yourusername/LearnSphere AI.git
 ```
 
 ### 2. Open the project
 
 ```bash
-cd AI-Learning-Buddy
+cd LearnSphere AI
 ```
 
 ### 3. Install dependencies
