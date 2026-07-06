@@ -9,188 +9,317 @@ from prompts import (
     summary_prompt,
     flashcard_prompt,
     planner_prompt,
-    resources_prompt
+    resources_prompt,
+    ask_anything_prompt,
+    pdf_summary_prompt,
+    pdf_quiz_prompt,
+    pdf_flashcards_prompt,
+    pdf_interview_prompt,
 )
 
-from utils import generate_response
+from utils import (
+    generate_response,
+    display_output,
+    show_error,
+    show_success,
+)
 
+from pdf_utils import (
+    extract_text_from_pdf,
+    clean_pdf_text,
+    get_pdf_statistics,
+)
 
-def load_css():
-    with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
+# =====================================================
+# Page Configuration
+# =====================================================
 
 st.set_page_config(
     page_title="AI Learning Buddy",
-    page_icon="🎓",
-    layout="wide"
+    page_icon="🤖",
+    layout="wide",
 )
+
+# =====================================================
+# Load CSS
+# =====================================================
+
+def load_css():
+    with open("style.css") as css:
+        st.markdown(
+            f"<style>{css.read()}</style>",
+            unsafe_allow_html=True,
+        )
 
 load_css()
 
-# ==========================
-# Header
-# ==========================
-st.markdown("<h1>🎓 AI Learning Buddy</h1>", unsafe_allow_html=True)
+# =====================================================
+# Session State
+# =====================================================
 
-st.markdown(
-    "<p style='text-align:center;color:gray;'>Your Personal AI Learning Platform</p>",
-    unsafe_allow_html=True
+if "response" not in st.session_state:
+    st.session_state.response = ""
+
+if "pdf_text" not in st.session_state:
+    st.session_state.pdf_text = ""
+
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
+
+# Interview Tab
+if "interview_response" not in st.session_state:
+    st.session_state.interview_response = ""
+
+# Notes Tab
+if "notes_response" not in st.session_state:
+    st.session_state.notes_response = ""
+
+# PDF Tab
+if "pdf_response" not in st.session_state:
+    st.session_state.pdf_response = ""
+
+# Resources Tab
+if "resource_response" not in st.session_state:
+    st.session_state.resource_response = ""
+
+# =====================================================
+# Sidebar
+# =====================================================
+
+with st.sidebar:
+
+    st.title("🤖 AI Learning Buddy")
+
+    st.markdown("---")
+
+    st.info(
+        """
+### Features
+
+📘 Learn
+
+💼 Interview Prep
+
+📝 Notes
+
+📄 PDF Tools
+
+⚙️ Resources
+"""
+    )
+
+    st.markdown("---")
+
+    st.success("Powered by OpenRouter API")
+
+# =====================================================
+# Dashboard Title
+# =====================================================
+
+st.title("🤖 AI Learning Buddy")
+
+st.caption(
+    "Your AI-powered study assistant for learning, interview preparation, notes, PDFs, and resources."
 )
 
-# ==========================
-# Metrics
-# ==========================
-col1, col2, col3 = st.columns(3)
+st.divider()
 
-with col1:
-    st.metric("📖 Learning Modes", "10")
+# =====================================================
+# Tabs
+# =====================================================
 
-with col2:
-    st.metric("🤖 AI Powered", "Yes")
-
-with col3:
-    st.metric("⚡ Response", "Instant")
-
-st.markdown("---")
-
-# ==========================
-# Sidebar
-# ==========================
-st.sidebar.title("📚 Features")
-
-st.sidebar.markdown("""
-📖 Explain Concept
-
-🌍 Real-Life Example
-
-❓ Generate Quiz
-
-🗺️ Learning Roadmap
-
-💼 Interview Questions
-
-📝 Notes Summarizer
-
-🧠 Flashcards
-
-📅 Study Planner
-
-📚 Learning Resources
-
-💬 Ask Anything
-""")
-
-# ==========================
-# Main Content
-# ==========================
-st.subheader("📚 Choose a Learning Mode")
-
-activity = st.radio(
-    "Choose Activity",
+learn_tab, interview_tab, notes_tab, pdf_tab, resource_tab = st.tabs(
     [
-        "Explain Concept",
-        "Real-Life Example",
-        "Generate Quiz",
-        "Learning Roadmap",
-        "Interview Questions",
-        "Notes Summarizer",
-        "Flashcards",
-        "Study Planner",
-        "Learning Resources",
-        "Ask Anything"
+        "📘 Learn",
+        "💼 Interview Prep",
+        "📝 Notes",
+        "📄 PDF Tools",
+        "⚙️ Resources",
     ]
 )
+with learn_tab:
 
-# Input Field
-if activity == "Notes Summarizer":
+    st.subheader("📘 Learn")
+
+    feature = st.selectbox(
+        "Choose a learning tool",
+        [
+            "Explain Concept",
+            "Real-Life Example",
+            "Generate Quiz",
+            "Learning Roadmap",
+            "Ask Anything",
+        ],
+    )
 
     user_input = st.text_area(
-        "Paste your notes",
-        height=250
+        "Enter your topic or question",
+        height=180,
+        placeholder="Example: Binary Search, OOP, Operating System...",
     )
 
-else:
+    if st.button(
+        "🚀 Generate",
+        use_container_width=True,
+    ):
 
-    user_input = st.text_input(
-        "Enter Topic",
-        placeholder="Example: Python, AI, DBMS..."
+        if not user_input.strip():
+            show_error("Please enter a topic.")
+            st.stop()
+
+        with st.spinner("Generating response..."):
+
+            if feature == "Explain Concept":
+                prompt = explain_prompt(user_input)
+
+            elif feature == "Real-Life Example":
+                prompt = example_prompt(user_input)
+
+            elif feature == "Generate Quiz":
+                prompt = quiz_prompt(user_input)
+
+            elif feature == "Learning Roadmap":
+                prompt = roadmap_prompt(user_input)
+
+            else:
+                prompt = ask_anything_prompt(user_input)
+
+            result = generate_response(prompt)
+
+            st.session_state.response = result
+
+            show_success("Response generated successfully!")
+
+    if st.session_state.response:
+
+        st.markdown("---")
+
+        display_output(
+            feature,
+            st.session_state.response,
+        )
+with interview_tab:
+
+    st.subheader("💼 Interview Preparation")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        topic = st.text_input(
+            "Topic",
+            placeholder="Example: Java, DBMS, OOP...",
+        )
+
+    with col2:
+        difficulty = st.selectbox(
+            "Difficulty",
+            [
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+            ],
+        )
+
+    total_questions = st.slider(
+        "Number of Questions",
+        min_value=5,
+        max_value=20,
+        value=10,
     )
 
-# Generate Button
-if st.button("🚀 Generate"):
+    if st.button(
+        "🎯 Generate Interview Questions",
+        use_container_width=True,
+        key="interview_button",
+    ):
 
-    if user_input.strip() == "":
+        if not topic.strip():
+            show_error("Please enter a topic.")
+            st.stop()
 
-        st.warning("Please enter input.")
+        prompt = interview_prompt(
+            f"""
+Topic: {topic}
 
-    else:
+Difficulty: {difficulty}
 
-        if activity == "Explain Concept":
-            prompt = explain_prompt(user_input)
+Generate exactly {total_questions} interview questions with answers.
+"""
+        )
 
-        elif activity == "Real-Life Example":
-            prompt = example_prompt(user_input)
+        with st.spinner("Preparing interview questions..."):
 
-        elif activity == "Generate Quiz":
-            prompt = quiz_prompt(user_input)
+            result = generate_response(prompt)
 
-        elif activity == "Learning Roadmap":
-            prompt = roadmap_prompt(user_input)
+            st.session_state.interview_response = result
 
-        elif activity == "Interview Questions":
-            prompt = interview_prompt(user_input)
+            show_success("Interview Questions Generated!")
 
-        elif activity == "Notes Summarizer":
-            prompt = summary_prompt(user_input)
+    if st.session_state.interview_response:
 
-        elif activity == "Flashcards":
-            prompt = flashcard_prompt(user_input)
+        st.markdown("---")
 
-        elif activity == "Study Planner":
-            prompt = planner_prompt(user_input)
+        display_output(
+            "Interview Questions",
+            st.session_state.interview_response,
+        )
+# =====================================================
+# Notes Tab
+# =====================================================
 
-        elif activity == "Learning Resources":
-            prompt = resources_prompt(user_input)
+with notes_tab:
 
-        else:
-            prompt = user_input
+    st.subheader("📝 Notes")
 
-        with st.spinner("🤖 AI is generating your response..."):
+    notes_feature = st.selectbox(
+        "Choose a Notes Tool",
+        [
+            "Notes Summarizer",
+            "Flashcards",
+            "Study Planner"
+        ],
+        key="notes_feature"
+    )
 
-            try:
+    notes_input = st.text_area(
+        "Enter your notes or study topic",
+        height=250,
+        placeholder="Paste your notes or enter a topic...",
+        key="notes_input"
+    )
 
-                result = generate_response(prompt)
+    if st.button(
+        "📝 Generate",
+        use_container_width=True,
+        key="notes_button"
+    ):
 
-                st.success("✅ Response Generated Successfully!")
+        if not notes_input.strip():
+            show_error("Please enter some notes or a topic.")
+            st.stop()
 
-                st.markdown("## 🤖 AI Response")
+        with st.spinner("Generating..."):
 
-                st.markdown(
-                    f"""
-                    <div class="response-card">
+            if notes_feature == "Notes Summarizer":
+                prompt = summary_prompt(notes_input)
 
-                    {result}
+            elif notes_feature == "Flashcards":
+                prompt = flashcard_prompt(notes_input)
 
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+            else:
+                prompt = planner_prompt(notes_input)
 
-                st.download_button(
-                    label="📥 Download Response",
-                    data=result,
-                    file_name="AI_Response.txt",
-                    mime="text/plain"
-                )
+            result = generate_response(prompt)
 
-            except Exception as e:
+            st.session_state.notes_response = result
 
-                st.error(str(e))
+            show_success("Response generated successfully!")
 
-# ==========================
-# Footer
-# ==========================
-st.markdown("---")
+    if st.session_state.notes_response:
 
-st.caption("Made with ❤️ using Streamlit + OpenRouter")
+        st.markdown("---")
+
+        display_output(
+            notes_feature,
+            st.session_state.notes_response
+        )
