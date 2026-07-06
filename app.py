@@ -137,6 +137,11 @@ learn_tab, interview_tab, notes_tab, pdf_tab, resource_tab = st.tabs(
         "⚙️ Resources",
     ]
 )
+
+# =====================================================
+# Learn Tab
+# =====================================================
+
 with learn_tab:
 
     st.subheader("📘 Learn")
@@ -150,12 +155,14 @@ with learn_tab:
             "Learning Roadmap",
             "Ask Anything",
         ],
+        key="learn_feature",
     )
 
     user_input = st.text_area(
         "Enter your topic or question",
         height=180,
         placeholder="Example: Binary Search, OOP, Operating System...",
+        key="learn_input",
     )
 
     if st.button(
@@ -198,6 +205,10 @@ with learn_tab:
             feature,
             st.session_state.response,
         )
+# =====================================================
+# Interview Tab
+# =====================================================
+
 with interview_tab:
 
     st.subheader("💼 Interview Preparation")
@@ -263,6 +274,7 @@ Generate exactly {total_questions} interview questions with answers.
             "Interview Questions",
             st.session_state.interview_response,
         )
+
 # =====================================================
 # Notes Tab
 # =====================================================
@@ -276,22 +288,22 @@ with notes_tab:
         [
             "Notes Summarizer",
             "Flashcards",
-            "Study Planner"
+            "Study Planner",
         ],
-        key="notes_feature"
+        key="notes_feature",
     )
 
     notes_input = st.text_area(
         "Enter your notes or study topic",
         height=250,
         placeholder="Paste your notes or enter a topic...",
-        key="notes_input"
+        key="notes_input",
     )
 
     if st.button(
         "📝 Generate",
         use_container_width=True,
-        key="notes_button"
+        key="notes_button",
     ):
 
         if not notes_input.strip():
@@ -321,7 +333,7 @@ with notes_tab:
 
         display_output(
             notes_feature,
-            st.session_state.notes_response
+            st.session_state.notes_response,
         )
 # =====================================================
 # PDF Tools
@@ -333,7 +345,7 @@ with pdf_tab:
 
     uploaded_pdf = st.file_uploader(
         "Upload a PDF",
-        type=["pdf"]
+        type=["pdf"],
     )
 
     if uploaded_pdf:
@@ -359,11 +371,11 @@ with pdf_tab:
     else:
         st.info("Upload a PDF to begin.")
 
-    
     if st.session_state.pdf_text:
 
         st.markdown("---")
-                pdf_feature = st.selectbox(
+
+        pdf_feature = st.selectbox(
             "Choose a PDF Tool",
             [
                 "Summarize PDF",
@@ -431,13 +443,13 @@ with resource_tab:
     topic = st.text_input(
         "Enter a topic",
         placeholder="Example: Python, DSA, Machine Learning...",
-        key="resource_topic"
+        key="resource_topic",
     )
 
     if st.button(
         "📚 Find Resources",
         use_container_width=True,
-        key="resource_button"
+        key="resource_button",
     ):
 
         if not topic.strip():
@@ -460,7 +472,5 @@ with resource_tab:
 
         display_output(
             "Recommended Resources",
-            st.session_state.resource_response
+            st.session_state.resource_response,
         )
-
-        
