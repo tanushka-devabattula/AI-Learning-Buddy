@@ -35,7 +35,7 @@ from pdf_utils import (
 # =====================================================
 
 st.set_page_config(
-    page_title="AI Learning Buddy",
+    page_title="LearnSphere AI",
     page_icon="🤖",
     layout="wide",
 )
@@ -88,7 +88,7 @@ if "resource_response" not in st.session_state:
 
 with st.sidebar:
 
-    st.title("🤖 AI Learning Buddy")
+    st.title("🤖 LearnSphere AI")
 
     st.markdown("---")
 
@@ -116,7 +116,7 @@ with st.sidebar:
 # Dashboard Title
 # =====================================================
 
-st.title("🤖 AI Learning Buddy")
+st.title("🤖 LearnSphere AI")
 
 st.caption(
     "Your AI-powered study assistant for learning, interview preparation, notes, PDFs, and resources."
